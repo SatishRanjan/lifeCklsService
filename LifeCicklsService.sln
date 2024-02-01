@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LifeCicklsService", "LifeCicklsService\LifeCicklsService.csproj", "{D1866404-C94E-4064-A6F3-4D65F860FB14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifeCicklsService", "LifeCicklsService\LifeCicklsService.csproj", "{D1866404-C94E-4064-A6F3-4D65F860FB14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LifeCicklsWebApi", "LifeCicklsWebApi\LifeCicklsWebApi.csproj", "{917CE43A-16F5-452F-9C84-4D54A79265A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LifeCicklsWebApi", "LifeCicklsWebApi\LifeCicklsWebApi.csproj", "{917CE43A-16F5-452F-9C84-4D54A79265A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LifeCklsModels", "LifeCklsModels\LifeCklsModels.csproj", "{12E347F6-6621-4D03-B6F5-92C8C44DEE7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{917CE43A-16F5-452F-9C84-4D54A79265A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{917CE43A-16F5-452F-9C84-4D54A79265A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{917CE43A-16F5-452F-9C84-4D54A79265A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12E347F6-6621-4D03-B6F5-92C8C44DEE7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12E347F6-6621-4D03-B6F5-92C8C44DEE7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12E347F6-6621-4D03-B6F5-92C8C44DEE7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12E347F6-6621-4D03-B6F5-92C8C44DEE7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

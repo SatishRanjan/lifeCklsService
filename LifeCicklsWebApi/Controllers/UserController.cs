@@ -1,17 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LifeCicklsService.Services;
+using LifeCklsModels;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("v1")]
 public class UserController : ControllerBase
 {
-    // Existing code...
+    private readonly IUserService _userService;
+    public UserController() 
+    {
+        _userService = new UserService();
+    }
 
     // GET v1/user/{id}
     [HttpGet("user/{id}")]
     public IActionResult GetUserById(int id)
     {
-        // Retrieve user information based on the provided id
-        // Replace this with your actual logic to fetch user data
+        // TODO
         var user = GetUserFromDatabase(id);
 
         if (user == null)
@@ -24,49 +29,25 @@ public class UserController : ControllerBase
 
     // PUT v1/user/register
     [HttpPut("user/register")]
-    public IActionResult RegisterUser([FromBody] UserRegistrationRequest userRegistrationRequest)
+    public IActionResult RegisterUser([FromBody] User registrationRequest)
     {
-        // Replace this with your actual logic to handle user registration
-        // The userRegistrationRequest object will contain the data sent in the request body
-        // You might want to validate the data and then save it to the database
-        // For demonstration purposes, a simple acknowledgment is returned here.
-
-        if (userRegistrationRequest == null)
+        if (registrationRequest == null)
         {
             return BadRequest("Invalid request data");
         }
 
-        // Process user registration logic here...
+        var registeredUser = _userService.Register(registrationRequest);
 
-        return Ok($"User registered: {userRegistrationRequest.FirstName} {userRegistrationRequest.LastName}");
+        return Ok(registeredUser);
     }
-
-    // Other actions...
 
     private User GetUserFromDatabase(int id)
     {
-        // Replace this with your actual logic to fetch user data from the database
-        // For demonstration purposes, a simple User class is used here.
         return new User
         {
-            Id = id,
+            LifeCklId = id.ToString(),
             FirstName = "John",
-            LastName = "Doe",
-            // ... other user properties
+            LastName = "Doe"
         };
     }
-}
-
-public class User
-{
-    public int Id { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-}
-
-public class UserRegistrationRequest
-{
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    // ... other registration properties
 }

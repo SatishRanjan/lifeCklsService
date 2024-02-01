@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Services\MongoDbService\" />
+    <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
+    <ProjectReference Include="..\LifeCklsModels\LifeCklsModels.csproj" />
   </ItemGroup>
 
 </Project>

@@ -36,16 +36,26 @@ namespace LifeCicklsService.Services
         public UserProfile Register(UserRegistrationRequest userRegistrationRequest)
         {
             var savedProfile = SaveUserProfile(userRegistrationRequest);
-            SaveLifeCkl(savedProfile);
+            try
+            {
+                SaveLifeCkl(savedProfile);
+            }
+            catch
+            {
+                // Delete UserProfile is LifeCkl save fails
+                DeleteUserProfile(savedProfile.ProfileId);
+                throw new Exception("Failed to save LifeCkls");
+            }
 
             return savedProfile;
         }
 
         public UserProfile SaveUserProfile(UserRegistrationRequest userRegistrationRequest)
         {
-            UserProfile userProfile = new UserProfile
+            UserProfile userProfile = new()
             {
                 UserName = userRegistrationRequest.UserName,
+                Password = PasswordHelper.GetPasswordHash(userRegistrationRequest.Password),
                 FirstName = userRegistrationRequest.FirstName,
                 LastName = userRegistrationRequest.LastName,
                 Age = userRegistrationRequest.Age,
@@ -54,10 +64,9 @@ namespace LifeCicklsService.Services
                 State = userRegistrationRequest.State,
                 City = userRegistrationRequest.City,
                 Email = userRegistrationRequest.Email,
-                PhoneNumber = userRegistrationRequest.PhoneNumber
+                PhoneNumber = userRegistrationRequest.PhoneNumber,
+                ProfileId = Guid.NewGuid().ToString()
             };
-
-            userProfile.ProfileId = Guid.NewGuid().ToString();
             BsonDocument bsonDoc = userProfile.ToBsonDocument();
             _profileCollection.InsertOne(bsonDoc);
 
@@ -72,6 +81,22 @@ namespace LifeCicklsService.Services
             BsonDocument bsonDoc = lifeCkl.ToBsonDocument();
             _lifeCklsCollection.InsertOne(bsonDoc);
             return lifeCkl;
+        }
+
+        public bool DeleteUserProfile(string profileId)
+        {
+            // Specify the filter to identify the document to be deleted
+            var filter = Builders<BsonDocument>.Filter.Eq("ProfileId", profileId);
+
+            // Delete the document matching the filter
+            var result = _profileCollection.DeleteOne(filter);
+
+            if (result.DeletedCount > 0)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

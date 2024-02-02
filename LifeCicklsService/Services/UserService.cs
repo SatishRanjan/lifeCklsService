@@ -15,8 +15,10 @@ namespace LifeCicklsService.Services
     {
         private string _connectionString = "mongodb://localhost:55000/";
         private string _dbName = "lifecklsstore";
-        private string _collectionName = "users";
-        private IMongoCollection<BsonDocument> _collection;
+        private string _lifeCklsCollectionName = "lifeCkls";
+        private string _profileCollectionName = "profiles";
+        private IMongoCollection<BsonDocument> _lifeCklsCollection;
+        private IMongoCollection<BsonDocument> _profileCollection;
 
         public UserService()
         {
@@ -27,18 +29,49 @@ namespace LifeCicklsService.Services
             var database = client.GetDatabase(_dbName);
 
             // Get a reference to the collection
-            _collection = database.GetCollection<BsonDocument>(_collectionName);
+            _lifeCklsCollection = database.GetCollection<BsonDocument>(_lifeCklsCollectionName);
+            _profileCollection = database.GetCollection<BsonDocument>(_profileCollectionName);
         }
 
-        public User Register(User user)
+        public UserProfile Register(UserRegistrationRequest userRegistrationRequest)
         {
-            user.LifeCklId = $"@{user.FirstName}{user.LastName.Substring(0,1)}";
+            var savedProfile = SaveUserProfile(userRegistrationRequest);
+            SaveLifeCkl(savedProfile);
 
-            // Convert the User object to a BsonDocument
-            BsonDocument userDoc = user.ToBsonDocument();
-            _collection.InsertOne(userDoc);
+            return savedProfile;
+        }
 
-            return user;
+        public UserProfile SaveUserProfile(UserRegistrationRequest userRegistrationRequest)
+        {
+            UserProfile userProfile = new UserProfile
+            {
+                UserName = userRegistrationRequest.UserName,
+                FirstName = userRegistrationRequest.FirstName,
+                LastName = userRegistrationRequest.LastName,
+                Age = userRegistrationRequest.Age,
+                Gender = userRegistrationRequest.Gender,
+                Country = userRegistrationRequest.Country,
+                State = userRegistrationRequest.State,
+                City = userRegistrationRequest.City,
+                Email = userRegistrationRequest.Email,
+                PhoneNumber = userRegistrationRequest.PhoneNumber
+            };
+
+            userProfile.ProfileId = Guid.NewGuid().ToString();
+            BsonDocument bsonDoc = userProfile.ToBsonDocument();
+            _profileCollection.InsertOne(bsonDoc);
+
+            return userProfile;
+        }
+
+        public LifeCkl SaveLifeCkl(UserProfile userProfile)
+        {
+            LifeCkl lifeCkl = new LifeCkl { ProfileId = userProfile.ProfileId };
+
+            userProfile.ProfileId = Guid.NewGuid().ToString();
+            BsonDocument bsonDoc = lifeCkl.ToBsonDocument();
+            _lifeCklsCollection.InsertOne(bsonDoc);
+            return lifeCkl;
         }
     }
 }

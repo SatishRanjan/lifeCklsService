@@ -9,6 +9,6 @@ namespace LifeCicklsService.Services
 {
     public interface IUserService
     {
-        public User Register(User user);
+        public UserProfile Register(UserRegistrationRequest user);
     }
 }

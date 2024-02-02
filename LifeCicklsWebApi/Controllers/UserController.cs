@@ -17,7 +17,7 @@ public class UserController : ControllerBase
     public IActionResult GetUserById(int id)
     {
         // TODO
-        var user = GetUserFromDatabase(id);
+        UserProfile user = null;//GetUserFromDatabase(id);
 
         if (user == null)
         {
@@ -29,7 +29,7 @@ public class UserController : ControllerBase
 
     // PUT v1/user/register
     [HttpPut("user/register")]
-    public IActionResult RegisterUser([FromBody] User registrationRequest)
+    public IActionResult RegisterUser([FromBody] UserRegistrationRequest registrationRequest)
     {
         if (registrationRequest == null)
         {
@@ -39,15 +39,5 @@ public class UserController : ControllerBase
         var registeredUser = _userService.Register(registrationRequest);
 
         return Ok(registeredUser);
-    }
-
-    private User GetUserFromDatabase(int id)
-    {
-        return new User
-        {
-            LifeCklId = id.ToString(),
-            FirstName = "John",
-            LastName = "Doe"
-        };
-    }
+    }   
 }

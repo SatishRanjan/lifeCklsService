@@ -35,16 +35,25 @@ namespace LifeCicklsService.Services
 
         public UserProfile Register(UserRegistrationRequest userRegistrationRequest)
         {
-            var savedProfile = SaveUserProfile(userRegistrationRequest);
+            UserProfile? savedProfile;
+            try
+            {
+                savedProfile = SaveUserProfile(userRegistrationRequest);                
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to save UserProfile, error: {e.Message}");
+            }
+           
             try
             {
                 SaveLifeCkl(savedProfile);
             }
-            catch
+            catch (Exception e)
             {
                 // Delete UserProfile is LifeCkl save fails
                 DeleteUserProfile(savedProfile.ProfileId);
-                throw new Exception("Failed to save LifeCkls");
+                throw new Exception($"Failed to save LifeCkls, error: {e.Message}");
             }
 
             return savedProfile;

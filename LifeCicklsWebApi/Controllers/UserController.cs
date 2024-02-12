@@ -1,6 +1,8 @@
 ﻿using LifeCicklsService.Services;
+using LifeCicklsWebApi.Security;
 using LifeCklsModels;
 using Microsoft.AspNetCore.Mvc;
+
 
 [ApiController]
 [Route("v1")]
@@ -12,6 +14,7 @@ public class UserController : ControllerBase
         _userService = new UserService();
     }
 
+    [LifeCklsServiceAuthorize]
     // GET v1/user/{id}
     [HttpGet("user/{id}")]
     public IActionResult GetUserById(int id)

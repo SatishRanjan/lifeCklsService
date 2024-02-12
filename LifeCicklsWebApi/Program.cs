@@ -37,8 +37,8 @@ namespace LifeCicklsWebApi
 
             app.UseCors("AllowAll");
 
-            //app.Run();
-            app.Run("http://localhost:8001");
+            app.Run();
+            //app.Run("http://localhost:8001");
         }
     }
 }

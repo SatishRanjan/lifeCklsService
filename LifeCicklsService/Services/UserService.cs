@@ -13,7 +13,8 @@ namespace LifeCicklsService.Services
 {
     public class UserService : IUserService
     {
-        private string _connectionString = "mongodb://localhost:55000/";
+        //private string _connectionString = "mongodb://localhost:55000/";
+        private string _connectionString = "COSMOSDB_MONGO_CONNECTION";
         private string _dbName = "lifecklsstore";
         private string _lifeCklsCollectionName = "lifeCkls";
         private string _profileCollectionName = "profiles";
@@ -23,7 +24,7 @@ namespace LifeCicklsService.Services
         public UserService()
         {
             // Create a MongoClient to connect to the server
-            var client = new MongoClient(_connectionString);
+            var client = new MongoClient(Environment.GetEnvironmentVariable(_connectionString));
 
             // Get a reference to the database
             var database = client.GetDatabase(_dbName);

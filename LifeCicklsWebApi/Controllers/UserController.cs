@@ -14,7 +14,7 @@ public class UserController : ControllerBase
         _userService = new UserService();
     }
 
-    [LifeCklsServiceAuthorize]
+    //[LifeCklsServiceAuthorize]
     // GET v1/user/{id}
     [HttpGet("user/{id}")]
     public IActionResult GetUserById(int id)

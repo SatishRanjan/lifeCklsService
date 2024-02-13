@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace LifeCklsModels
 {
     public class UserProfile
     {
+        public ObjectId Id { get; set; }
         public string ProfileId { get; set; }
         public string UserName { get; set; }
         public string Password { get; set; }

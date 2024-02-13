@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Core.Configuration;
 using MongoDB.Bson;
 using System.Collections;
+using MongoDB.Bson.Serialization;
 
 namespace LifeCicklsService.Services
 {
@@ -107,6 +108,45 @@ namespace LifeCicklsService.Services
             }
 
             return false;
+        }
+
+        public UserProfile? FindByUserName(string userName)
+        {
+            // Define the filter to find the user by username
+            var filter = Builders<BsonDocument>.Filter.Eq("UserName", userName);
+            // Execute the find operation
+            var user = _profileCollection.Find(filter).FirstOrDefault();
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return ConvertToUserProfile(user);
+        }
+
+        public UserProfile ConvertToUserProfile(BsonDocument bsonDocument)
+        {
+            var userProfile = BsonSerializer.Deserialize<UserProfile>(bsonDocument);
+            return userProfile;
+        }
+
+        public UserProfile? Login(string username, string password)
+        {
+            var user = FindByUserName(username);
+            if (user == null)
+            {
+                return null;
+            }
+
+            var passwordHash = PasswordHelper.GetPasswordHash(password);
+
+            if (!string.Equals(user.Password, passwordHash))
+            {
+                return null;
+            }
+
+            return user;
         }
     }
 }

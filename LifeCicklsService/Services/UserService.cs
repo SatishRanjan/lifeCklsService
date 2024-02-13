@@ -14,12 +14,12 @@ namespace LifeCicklsService.Services
     public class UserService : IUserService
     {
         //private string _connectionString = "mongodb://localhost:55000/";
-        private string _connectionString = "COSMOSDB_MONGO_CONNECTION";
-        private string _dbName = "lifecklsstore";
-        private string _lifeCklsCollectionName = "lifeCkls";
-        private string _profileCollectionName = "profiles";
-        private IMongoCollection<BsonDocument> _lifeCklsCollection;
-        private IMongoCollection<BsonDocument> _profileCollection;
+        private readonly string _connectionString = "COSMOSDB_MONGO_CONNECTION";
+        private readonly string _dbName = "lifecklsstore";
+        private readonly string _lifeCklsCollectionName = "lifeCkls";
+        private readonly string _profileCollectionName = "profiles";
+        private readonly IMongoCollection<BsonDocument> _lifeCklsCollection;
+        private readonly IMongoCollection<BsonDocument> _profileCollection;
 
         public UserService()
         {

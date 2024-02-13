@@ -1,5 +1,4 @@
 ﻿using LifeCicklsService.Services;
-using LifeCicklsWebApi.Security;
 using LifeCklsModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,5 +41,5 @@ public class UserController : ControllerBase
         var registeredUser = _userService.Register(registrationRequest);
 
         return Ok(registeredUser);
-    }   
+    }
 }

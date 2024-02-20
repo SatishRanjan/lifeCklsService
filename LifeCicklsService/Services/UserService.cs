@@ -114,15 +114,11 @@ namespace LifeCicklsService.Services
         {
             // Define the filter to find the user by username
             var filter = Builders<BsonDocument>.Filter.Eq("UserName", userName);
+
             // Execute the find operation
             var user = _profileCollection.Find(filter).FirstOrDefault();
 
-            if (user == null)
-            {
-                return null;
-            }
-
-            return ConvertToUserProfile(user);
+            return user == null ? null : ConvertToUserProfile(user);
         }
 
         public UserProfile ConvertToUserProfile(BsonDocument bsonDocument)

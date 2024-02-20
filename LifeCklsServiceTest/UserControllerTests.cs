@@ -33,6 +33,46 @@ namespace LifeCklsServiceTest
         }
 
         [TestMethod]
+        public async Task FindUserByNameTest()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+            // Act
+            var response = await client.GetAsync($"/v1/user/{Guid.NewGuid().ToString()}");
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.NotFound);
+
+            var userName = Guid.NewGuid().ToString();
+            var password = Guid.NewGuid().ToString();
+            var registrationRequest = new UserRegistrationRequest
+            {
+                UserName = userName,
+                Password = password,
+                FirstName = "F1",
+                LastName = "L1",
+                Age = 5,
+                Gender = "M",
+                Country = "U",
+                State = "W",
+                City = "S",
+                Email = "test@test.com",
+                PhoneNumber = "5703200471"
+            };
+
+            var jsonPayload = JsonConvert.SerializeObject(registrationRequest);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            // Act
+            response = await client.PutAsync("/v1/user/register", content);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            response = await client.GetAsync($"/v1/user/{userName}");
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            string stringContent = await response.Content.ReadAsStringAsync();
+
+            Assert.IsTrue(stringContent.Contains(userName));
+        }
+
+        [TestMethod]
         public async Task UserLoginTest()
         {
             // Arrange

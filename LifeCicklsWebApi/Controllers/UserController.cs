@@ -18,16 +18,19 @@ public class UserController : ControllerBase
     [HttpGet("user/{username}")]
     public IActionResult GetUserByUserName(string username)
     {
-        // TODO
-        UserProfile user = null;//GetUserFromDatabase(id);
-
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("User name cannot be empty");
+        }
+       
+        UserProfile? user = _userService.FindByUserName(username);
         if (user == null)
         {
             return NotFound(); // Return 404 if the user is not found
         }
 
-        return Ok(user); // Return user data if found
-    }
+        return Ok(user);
+     }
 
     // PUT v1/user/register
     [HttpPut("user/register")]
@@ -65,7 +68,7 @@ public class UserController : ControllerBase
         var userProfile = _userService.Login(userLoginInfo.UserName, userLoginInfo.Password);
         if (userProfile == null)
         {
-            return BadRequest("Invalid user name or password");
+            return BadRequest("Invalid user name and/or password");
         }
 
         return Ok(userProfile);

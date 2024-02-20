@@ -96,7 +96,7 @@ namespace LifeCklsServiceTest
 
             // Optionally, you can read the response content
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(string.Equals(responseContent, "Invalid user name or password"));
+            Assert.IsTrue(string.Equals(responseContent, "Invalid user name and/or password"));
 
             // Successful loging test
             var userName = Guid.NewGuid().ToString();

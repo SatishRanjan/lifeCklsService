@@ -70,6 +70,43 @@ namespace LifeCklsServiceTest
             string stringContent = await response.Content.ReadAsStringAsync();
 
             Assert.IsTrue(stringContent.Contains(userName));
+
+            // User name casing test
+            userName = "TestUser010_" + Guid.NewGuid().ToString();
+            registrationRequest = new UserRegistrationRequest
+            {
+                UserName = userName,
+                Password = password,
+                FirstName = "F1",
+                LastName = "L1",
+                Age = 5,
+                Gender = "M",
+                Country = "U",
+                State = "W",
+                City = "S",
+                Email = "test@test.com",
+                PhoneNumber = "5703200471"
+            };
+
+            jsonPayload = JsonConvert.SerializeObject(registrationRequest);
+            content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            // Act
+            response = await client.PutAsync("/v1/user/register", content);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            // get user
+            response = await client.GetAsync($"/v1/user/" + userName.ToUpper());
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            stringContent = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(stringContent.Contains(userName.ToLower()));
+
+            // get user
+            response = await client.GetAsync($"/v1/user/" + userName.ToLower());
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            stringContent = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(stringContent.Contains(userName.ToLower()));
         }
 
         [TestMethod]

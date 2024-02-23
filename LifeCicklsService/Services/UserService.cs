@@ -9,6 +9,7 @@ using MongoDB.Driver.Core.Configuration;
 using MongoDB.Bson;
 using System.Collections;
 using MongoDB.Bson.Serialization;
+using System.Globalization;
 
 namespace LifeCicklsService.Services
 {
@@ -65,7 +66,7 @@ namespace LifeCicklsService.Services
         {
             UserProfile userProfile = new()
             {
-                UserName = userRegistrationRequest.UserName,
+                UserName = userRegistrationRequest.UserName.ToLower(),
                 Password = PasswordHelper.GetPasswordHash(userRegistrationRequest.Password),
                 FirstName = userRegistrationRequest.FirstName,
                 LastName = userRegistrationRequest.LastName,
@@ -111,12 +112,24 @@ namespace LifeCicklsService.Services
         }
 
         public UserProfile? FindByUserName(string userName)
-        {
+        {            
             // Define the filter to find the user by username
             var filter = Builders<BsonDocument>.Filter.Eq("UserName", userName);
 
             // Execute the find operation
             var user = _profileCollection.Find(filter).FirstOrDefault();
+
+            if (user == null)
+            {
+                filter = Builders<BsonDocument>.Filter.Eq("UserName", userName.ToUpper());
+                user = _profileCollection.Find(filter).FirstOrDefault();
+            }
+
+            if (user == null)
+            {
+                filter = Builders<BsonDocument>.Filter.Eq("UserName", userName.ToLower());
+                user = _profileCollection.Find(filter).FirstOrDefault();
+            }
 
             return user == null ? null : ConvertToUserProfile(user);
         }

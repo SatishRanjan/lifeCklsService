@@ -1,16 +1,17 @@
 ﻿using LifeCicklsService.Services;
 using LifeCklsModels;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 
 [ApiController]
 [Route("v1")]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;
-    public UserController() 
+    private readonly IUserService _userService;    
+    public UserController(IMongoClient mongoClient) 
     {
-        _userService = new UserService();
+        _userService = new UserService(mongoClient);
     }
 
     //[LifeCklsServiceAuthorize]
@@ -72,5 +73,33 @@ public class UserController : ControllerBase
         }
 
         return Ok(userProfile);
+    }
+
+    // POST v1/user/connect
+    [HttpPost("user/connect")]
+    public IActionResult Connect([FromBody] ConnectionRequest connectionRequest)
+    {
+        if (connectionRequest == null
+            || string.IsNullOrEmpty(connectionRequest.FromUserName)
+            || string.IsNullOrEmpty(connectionRequest.ToUserName))
+        {
+            return BadRequest("Invalid connection request!");
+        }
+
+        // Handle invalid user names
+        try
+        {
+            var userProfile = _userService.Connect(connectionRequest);
+            if (userProfile == null)
+            {
+                return BadRequest("Invalid connection request!");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.ToString());
+        }
+
+        return Ok($"Connection request to user {connectionRequest.FromUserName} sent successfully!");
     }
 }

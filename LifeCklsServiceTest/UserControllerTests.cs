@@ -178,5 +178,111 @@ namespace LifeCklsServiceTest
             response = await client.PostAsync("/v1/user/login", content);
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
         }
+
+        [TestMethod]
+        public async Task ConnectionRequest_Invalid()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+
+            // Invalid user name or password
+            var connectionRequest = new ConnectionRequest
+            {
+                FromUserName = "",
+                ToUserName = ""
+            
+            };
+
+            // Serialize the request object to JSON
+            var jsonPayload = JsonConvert.SerializeObject(connectionRequest);
+
+            // Create a StringContent object with the JSON payload
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await client.PostAsync("/v1/user/connect", content);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.BadRequest);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(string.Equals(responseContent, "Invalid connection request!"));
+        }
+
+        [TestMethod]
+        public async Task ConnectionRequest_Success()
+        {
+            // Arrange
+            var client = _factory.CreateClient();
+
+            // From user
+            var fromUserName = Guid.NewGuid().ToString();
+            var password = Guid.NewGuid().ToString();
+            var registrationRequest = new UserRegistrationRequest
+            {
+                UserName = fromUserName,
+                Password = password,
+                FirstName = "fromUser",
+                LastName = "L1",
+                Age = 5,
+                Gender = "M",
+                Country = "U",
+                State = "W",
+                City = "S",
+                Email = "test@test.com",
+                PhoneNumber = "5703200471"
+            };
+
+            var registrationPayload = JsonConvert.SerializeObject(registrationRequest);
+            var reqisrationContent = new StringContent(registrationPayload, Encoding.UTF8, "application/json");
+
+            // Act
+            var regresponse = await client.PutAsync("/v1/user/register", reqisrationContent);
+            Assert.IsTrue(regresponse.StatusCode == HttpStatusCode.OK);
+
+            // To user
+            var toUserName = Guid.NewGuid().ToString();
+            password = Guid.NewGuid().ToString();
+            registrationRequest = new UserRegistrationRequest
+            {
+                UserName = toUserName,
+                Password = password,
+                FirstName = "toUser",
+                LastName = "L1",
+                Age = 5,
+                Gender = "M",
+                Country = "U",
+                State = "W",
+                City = "S",
+                Email = "test@test.com",
+                PhoneNumber = "5703200471"
+            };
+
+            registrationPayload = JsonConvert.SerializeObject(registrationRequest);
+            reqisrationContent = new StringContent(registrationPayload, Encoding.UTF8, "application/json");
+
+            // Act
+            regresponse = await client.PutAsync("/v1/user/register", reqisrationContent);
+            Assert.IsTrue(regresponse.StatusCode == HttpStatusCode.OK);
+
+            // Invalid user name or password
+            var connectionRequest = new ConnectionRequest
+            {
+                FromUserName = fromUserName,
+                ToUserName = toUserName
+
+            };
+
+            // Serialize the request object to JSON
+            var jsonPayload = JsonConvert.SerializeObject(connectionRequest);
+
+            // Create a StringContent object with the JSON payload
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            // Act
+            var response = await client.PostAsync("/v1/user/connect", content);
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(string.Equals(responseContent, $"Connection request to user {connectionRequest.FromUserName} sent successfully!"));
+        }
     }
 }

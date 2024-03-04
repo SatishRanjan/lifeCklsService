@@ -12,5 +12,6 @@ namespace LifeCicklsService.Services
         public UserProfile? Login(string username, string password);
         public UserProfile? FindByUserName(string userName);
         public UserProfile Register(UserRegistrationRequest user);
+        public ConnectionRequest? Connect(ConnectionRequest connectionRequest);
     }
 }

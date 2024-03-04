@@ -16,11 +16,18 @@ namespace LifeCklsModels
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int Age { get; set; }
-        public string Gender { get; set; }
+        public string? Gender { get; set; }
         public string? Email { get; set; }
-        public string Country { get; set; }
+        public string? Country { get; set; }
         public string? State { get; set; }
         public string? City { get; set; }
         public string? PhoneNumber { get; set; }
+        public List<string> SentConnectionRequests { get; set; }
+        public List<string> IncomingConnectionRequests { get; set; }
+        public List<string> Stories { get; set; }
+        public List<string> Messages { get; set; }
+        public List<string> Connections { get; set; }
+        public DateTime CreatedAtUtc { get; set; }
+        public DateTime ModifiedAtUtc { get; set; }
     }
 }

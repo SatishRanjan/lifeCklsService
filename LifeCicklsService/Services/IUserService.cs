@@ -13,5 +13,8 @@ namespace LifeCicklsService.Services
         public UserProfile? FindByUserName(string userName);
         public UserProfile Register(UserRegistrationRequest user);
         public ConnectionRequest? Connect(ConnectionRequest connectionRequest);
+        public bool IsConnected(ConnectionRequest connectionRequest);
+        public bool IsConnectionPending(ConnectionRequest connectionRequest);
+        public List<ConnectionRequest> GetConnectionRequests(string userName);
     }
 }

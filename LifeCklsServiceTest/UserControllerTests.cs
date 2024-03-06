@@ -268,7 +268,6 @@ namespace LifeCklsServiceTest
             {
                 FromUserName = fromUserName,
                 ToUserName = toUserName
-
             };
 
             // Serialize the request object to JSON
@@ -283,6 +282,12 @@ namespace LifeCklsServiceTest
 
             var responseContent = await response.Content.ReadAsStringAsync();
             Assert.IsTrue(string.Equals(responseContent, $"Connection request to user {connectionRequest.FromUserName} sent successfully!"));
+
+            response = await client.GetAsync($"/v1/user/{toUserName}/connectionrequests");
+            Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
+
+            responseContent = await response.Content.ReadAsStringAsync();
+            Assert.IsTrue(!string.IsNullOrEmpty(responseContent));
         }
     }
 }

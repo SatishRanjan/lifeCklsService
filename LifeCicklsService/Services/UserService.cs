@@ -10,6 +10,7 @@ using MongoDB.Bson;
 using System.Collections;
 using MongoDB.Bson.Serialization;
 using System.Globalization;
+using MongoDB.Bson.Serialization.Conventions;
 
 namespace LifeCicklsService.Services
 {
@@ -37,13 +38,13 @@ namespace LifeCicklsService.Services
             UserProfile? savedProfile;
             try
             {
-                savedProfile = SaveUserProfile(userRegistrationRequest);                
+                savedProfile = SaveUserProfile(userRegistrationRequest);
             }
             catch (Exception e)
             {
                 throw new Exception($"Failed to save UserProfile, error: {e.Message}");
             }
-           
+
             try
             {
                 SaveLifeCkl(savedProfile);
@@ -58,28 +59,107 @@ namespace LifeCicklsService.Services
             return savedProfile;
         }
 
+        public List<ConnectionRequest> GetConnectionRequests(string userName)
+        {
+            List<ConnectionRequest> connectionRequests = new();
+            UserProfile? userProfile = FindByUserName(userName);
+            if (userProfile == null
+                || userProfile.IncomingConnectionRequests?.Any() == false)
+            {
+                return connectionRequests;
+            }
+
+            for (int i = 0; i < userProfile.IncomingConnectionRequests.Count; i++)
+            {
+                var filter = Builders<ConnectionRequest>.Filter.Eq("ToUserName", userName);
+                var connectionRequest = _connectionRequestsCollection.Find(filter).FirstOrDefault();
+                connectionRequest.FromUserFullName = userProfile.FirstName + " " + userProfile.LastName;
+                connectionRequests.Add(connectionRequest);
+            }
+
+            return connectionRequests;
+        }
+
+        public bool IsConnected(ConnectionRequest connectionRequest)
+        {
+            UserProfile? fromUserProfile = FindByUserName(connectionRequest.FromUserName);
+            UserProfile? toUserProfile = FindByUserName(connectionRequest.ToUserName);
+
+            if (fromUserProfile == null
+                || toUserProfile == null)
+            {
+                return false;
+            }
+
+            if (fromUserProfile.Connections?.Contains(toUserProfile.ProfileId) == true)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsConnectionPending(ConnectionRequest connectionRequest)
+        {
+            UserProfile? fromUserProfile = FindByUserName(connectionRequest.FromUserName);
+            UserProfile? toUserProfile = FindByUserName(connectionRequest.ToUserName);
+
+            if (fromUserProfile == null
+                || toUserProfile == null)
+            {
+                return false;
+            }
+
+            if (fromUserProfile.SentConnectionRequests != null)
+            {
+                if (fromUserProfile.SentConnectionRequests.Contains(toUserProfile.ProfileId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public ConnectionRequest? Connect(ConnectionRequest connectionRequest)
         {
             UserProfile? fromUserProfile = FindByUserName(connectionRequest.FromUserName);
             UserProfile? toUserProfile = FindByUserName(connectionRequest.ToUserName);
 
-            if (fromUserProfile == null 
+            if (fromUserProfile == null
                 || toUserProfile == null)
             {
                 return null;
             }
-          
+
             connectionRequest.RequestId = Guid.NewGuid().ToString();
             connectionRequest.RequestDateTimeUtc = DateTime.UtcNow;
             connectionRequest.RequestStaus = "Pending";
             _connectionRequestsCollection.InsertOne(connectionRequest);
 
+            // Update the incommig connection requests for the touser
             toUserProfile.IncomingConnectionRequests ??= new List<string>();
             toUserProfile.IncomingConnectionRequests.Add(fromUserProfile.ProfileId);
             var filter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.ToUserName);
             try
             {
                 var update = Builders<UserProfile>.Update.Set("IncomingConnectionRequests", toUserProfile.IncomingConnectionRequests);
+                _profileCollection.UpdateOne(filter, update);
+            }
+            catch
+            {
+                // Cleanup the connection request collection
+                DeleteConnectionRequest(connectionRequest.RequestId);
+                throw;
+            }
+
+            // Update the sent connection requests
+            fromUserProfile.SentConnectionRequests ??= new List<string>();
+            fromUserProfile.SentConnectionRequests.Add(toUserProfile.ProfileId);
+            filter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.FromUserName);
+            try
+            {
+                var update = Builders<UserProfile>.Update.Set("SentConnectionRequests", fromUserProfile.SentConnectionRequests);
                 _profileCollection.UpdateOne(filter, update);
             }
             catch
@@ -139,7 +219,7 @@ namespace LifeCicklsService.Services
         }
 
         public UserProfile? FindByUserName(string userName)
-        {            
+        {
             // Define the filter to find the user by username
             var filter = Builders<UserProfile>.Filter.Eq("UserName", userName);
 
@@ -160,7 +240,7 @@ namespace LifeCicklsService.Services
 
             return user == null ? null : user;
         }
-       
+
 
         public UserProfile? Login(string username, string password)
         {

@@ -8,8 +8,8 @@ using MongoDB.Driver;
 [Route("v1")]
 public class UserController : ControllerBase
 {
-    private readonly IUserService _userService;    
-    public UserController(IMongoClient mongoClient) 
+    private readonly IUserService _userService;
+    public UserController(IMongoClient mongoClient)
     {
         _userService = new UserService(mongoClient);
     }
@@ -23,7 +23,7 @@ public class UserController : ControllerBase
         {
             return BadRequest("User name cannot be empty");
         }
-       
+
         UserProfile? user = _userService.FindByUserName(username);
         if (user == null)
         {
@@ -31,7 +31,7 @@ public class UserController : ControllerBase
         }
 
         return Ok(user);
-     }
+    }
 
     // PUT v1/user/register
     [HttpPut("user/register")]
@@ -86,11 +86,22 @@ public class UserController : ControllerBase
             return BadRequest("Invalid connection request!");
         }
 
-        // Handle invalid user names
+        // If connection request to the user is already pending
+        if (_userService.IsConnectionPending(connectionRequest))
+        {
+            return StatusCode(409, "Connection request is pending for the user");
+        }
+
+        // If users are already connected to each other
+        if (_userService.IsConnected(connectionRequest))
+        {
+            return StatusCode(409, "User is already connected");
+        }
+
         try
         {
-            var userProfile = _userService.Connect(connectionRequest);
-            if (userProfile == null)
+            var requestResult = _userService.Connect(connectionRequest);
+            if (requestResult == null)
             {
                 return BadRequest("Invalid connection request!");
             }
@@ -101,5 +112,30 @@ public class UserController : ControllerBase
         }
 
         return Ok($"Connection request to user {connectionRequest.FromUserName} sent successfully!");
+    }
+
+    // GET v1/user/{username}/connectionrequests
+    [HttpGet("user/{username}/connectionrequests")]
+    public IActionResult GetConnectionRequests(string username)
+    {
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest("Invalid request.");
+        }
+
+        try
+        {
+            var requestResult = _userService.GetConnectionRequests(username);
+            if (requestResult == null || !requestResult.Any())
+            {
+                return NotFound("No connection requests found for the specified user.");
+            }
+
+            return Ok(requestResult);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
     }
 }

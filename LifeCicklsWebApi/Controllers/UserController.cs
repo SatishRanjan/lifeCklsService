@@ -81,7 +81,8 @@ public class UserController : ControllerBase
     {
         if (connectionRequest == null
             || string.IsNullOrEmpty(connectionRequest.FromUserName)
-            || string.IsNullOrEmpty(connectionRequest.ToUserName))
+            || string.IsNullOrEmpty(connectionRequest.ToUserName)
+            || string.Equals(connectionRequest.FromUserName, connectionRequest.ToUserName, StringComparison.OrdinalIgnoreCase))
         {
             return BadRequest("Invalid connection request!");
         }

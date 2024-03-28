@@ -16,5 +16,7 @@ namespace LifeCicklsService.Services
         public bool IsConnected(ConnectionRequest connectionRequest);
         public bool IsConnectionPending(ConnectionRequest connectionRequest);
         public List<ConnectionRequest> GetConnectionRequests(string userName);
+        public string UpdateConnectionOutcome(ConnectionRequestResult connectionResult);
+        public List<Connection> GetConnections(string userName);
     }
 }

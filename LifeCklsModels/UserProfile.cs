@@ -24,7 +24,7 @@ namespace LifeCklsModels
         public string? PhoneNumber { get; set; }
         public List<string> SentConnectionRequests { get; set; }
         public List<string> IncomingConnectionRequests { get; set; }
-        public List<string> Stories { get; set; }
+        public List<Story> Stories { get; set; }
         public List<string> Messages { get; set; }
         public List<string> Connections { get; set; }
         public DateTime CreatedAtUtc { get; set; }

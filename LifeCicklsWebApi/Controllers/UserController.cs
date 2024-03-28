@@ -115,6 +115,27 @@ public class UserController : ControllerBase
         return Ok($"Connection request to user {connectionRequest.FromUserName} sent successfully!");
     }
 
+    // POST v1/user/connectionrequestresult
+    [HttpPost("user/connectionrequestresult")]
+    public IActionResult ConnectionRequestResult([FromBody] ConnectionRequestResult connectionOutcome)
+    {
+        if (connectionOutcome == null
+            || string.IsNullOrEmpty(connectionOutcome.RequestId))
+        {
+            return BadRequest(new { message = "Invalid connection request!" });
+        }
+
+        try
+        {
+            string result = _userService.UpdateConnectionOutcome(connectionOutcome);
+           return Ok(new { message = result });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
+
     // GET v1/user/{username}/connectionrequests
     [HttpGet("user/{username}/connectionrequests")]
     public IActionResult GetConnectionRequests(string username)
@@ -137,6 +158,31 @@ public class UserController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
+    // GET v1/user/{username}/connections
+    [HttpGet("user/{username}/connections")]
+    public IActionResult GetConnections(string username)
+    {
+        if (string.IsNullOrEmpty(username))
+        {
+            return BadRequest(new { message = "Invalid request." });
+        }
+
+        try
+        {
+            var connections = _userService.GetConnections(username);
+            if (connections == null || !connections.Any())
+            {
+                return NotFound(new { message = "No connection requests found for the specified user." });
+            }
+
+            return Ok(connections);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new {message = $"An error occurred: {ex.Message}" });
         }
     }
 }

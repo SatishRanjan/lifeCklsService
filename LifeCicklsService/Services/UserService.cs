@@ -69,15 +69,55 @@ namespace LifeCicklsService.Services
                 return connectionRequests;
             }
 
-            for (int i = 0; i < userProfile.IncomingConnectionRequests.Count; i++)
+            for (int i = 0; i < userProfile.IncomingConnectionRequests?.Count; i++)
             {
-                var filter = Builders<ConnectionRequest>.Filter.Eq("ToUserName", userName);
+                var filter = Builders<ConnectionRequest>.Filter.Eq("ToUserName", userName) &
+                    Builders<ConnectionRequest>.Filter.Eq("RequestStaus", "Pending");
                 var connectionRequest = _connectionRequestsCollection.Find(filter).FirstOrDefault();
+                if (connectionRequest == null)
+                {
+                    continue;
+                }
                 connectionRequest.FromUserFullName = userProfile.FirstName + " " + userProfile.LastName;
                 connectionRequests.Add(connectionRequest);
             }
 
             return connectionRequests;
+        }
+
+        public List<Connection> GetConnections(string userName)
+        {
+            List<Connection> connections = new();
+            UserProfile? userProfile = FindByUserName(userName);
+            if (userProfile == null 
+                || userProfile.Connections == null  
+                || userProfile.Connections?.Any() == false)
+            {
+                return connections;
+            }
+
+            foreach(var connectionId in userProfile.Connections)
+            {
+                var filter = Builders<UserProfile>.Filter.Eq("ProfileId", connectionId);
+                var connectionProfile = _profileCollection.Find(filter).FirstOrDefault();
+                if (connectionProfile == null)
+                {
+                    continue;
+                }
+
+                Connection connection = new()
+                {
+                    ProfileId = connectionProfile.ProfileId,
+                    UserName = connectionProfile.UserName,
+                    FirstName = connectionProfile.FirstName,
+                    LastName = connectionProfile.LastName,
+                    Stories = connectionProfile.Stories
+                };
+
+                connections.Add(connection);
+            }
+
+            return connections;
         }
 
         public bool IsConnected(ConnectionRequest connectionRequest)
@@ -170,6 +210,53 @@ namespace LifeCicklsService.Services
             }
 
             return connectionRequest;
+        }
+
+        public string UpdateConnectionOutcome(ConnectionRequestResult connectionResult)
+        {
+            var filter = Builders<ConnectionRequest>.Filter.Eq("RequestId", connectionResult.RequestId);
+            var connectionRequest = _connectionRequestsCollection.Find(filter).FirstOrDefault();
+
+            if (connectionRequest == null)
+            {
+                return "Connection request not found";
+            }
+
+            UserProfile? fromUserProfile = FindByUserName(connectionRequest.FromUserName);
+            UserProfile? toUserProfile = FindByUserName(connectionRequest.ToUserName);
+
+            if (fromUserProfile == null
+                || toUserProfile == null)
+            {
+                return "From User or To User profile not found";
+            }
+
+            // Update the connection request status
+            var updateConnectionRequest = Builders<ConnectionRequest>.Update.Set("RequestStaus", connectionResult.ConnectionRequestOutcome);
+            _connectionRequestsCollection.UpdateOne(filter, updateConnectionRequest);
+
+            // Remove the incommig connection requests for the touser
+            toUserProfile.IncomingConnectionRequests ??= new List<string>();
+            toUserProfile.IncomingConnectionRequests.Remove(toUserProfile.ProfileId);
+            var profileFilter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.ToUserName);
+            var update = Builders<UserProfile>.Update.Set("IncomingConnectionRequests", toUserProfile.IncomingConnectionRequests);
+            _profileCollection.UpdateOne(profileFilter, update);
+
+            // Remove the sent connection requests for the from user
+            fromUserProfile.SentConnectionRequests ??= new List<string>();
+            fromUserProfile.SentConnectionRequests.Remove(fromUserProfile.ProfileId);
+            profileFilter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.FromUserName);
+            update = Builders<UserProfile>.Update.Set("SentConnectionRequests", fromUserProfile.SentConnectionRequests);
+            _profileCollection.UpdateOne(profileFilter, update);
+
+            // Add the connection to the user profile
+            toUserProfile.Connections ??= new List<string>();
+            toUserProfile.Connections.Add(fromUserProfile.ProfileId);
+            var toUserFilter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.ToUserName);
+            update = Builders<UserProfile>.Update.Set("Connections", toUserProfile.Connections);
+            _profileCollection.UpdateOne(toUserFilter, update);
+
+            return "Connection request outcome has been successfully recorded";
         }
 
         public UserProfile SaveUserProfile(UserRegistrationRequest userRegistrationRequest)

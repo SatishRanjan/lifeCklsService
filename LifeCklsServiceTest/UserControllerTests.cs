@@ -281,7 +281,7 @@ namespace LifeCklsServiceTest
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);
 
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.IsTrue(string.Equals(responseContent, $"Connection request to user {connectionRequest.FromUserName} sent successfully!"));
+            Assert.IsTrue(string.Equals(responseContent, $"Connection request to user {connectionRequest.ToUserName} sent successfully!"));
 
             response = await client.GetAsync($"/v1/user/{toUserName}/connectionrequests");
             Assert.IsTrue(response.StatusCode == HttpStatusCode.OK);

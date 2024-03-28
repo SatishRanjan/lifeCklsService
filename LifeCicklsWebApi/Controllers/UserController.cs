@@ -112,7 +112,7 @@ public class UserController : ControllerBase
             return StatusCode(500, ex.ToString());
         }
 
-        return Ok($"Connection request to user {connectionRequest.FromUserName} sent successfully!");
+        return Ok($"Connection request to user {connectionRequest.ToUserName} sent successfully!");
     }
 
     // POST v1/user/connectionrequestresult

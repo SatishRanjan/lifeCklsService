@@ -262,7 +262,7 @@ namespace LifeCicklsService.Services
             // Add the connection to the from profile as well since both users are not connected
             fromUserProfile.Connections ??= new List<string>();
             fromUserProfile.Connections.Add(toUserProfile.ProfileId);
-            var fromUserFilter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.ToUserName);
+            var fromUserFilter = Builders<UserProfile>.Filter.Eq("UserName", connectionRequest.FromUserName);
             update = Builders<UserProfile>.Update.Set("Connections", fromUserProfile.Connections);
             _profileCollection.UpdateOne(fromUserFilter, update);
 

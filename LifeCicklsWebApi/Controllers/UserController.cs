@@ -54,6 +54,46 @@ public class UserController : ControllerBase
         return Ok(registeredUser);
     }
 
+    // PUT v1/user/createstory
+    [HttpPut("user/createstory")]
+    public IActionResult CreateStory([FromBody] Story story)
+    {
+        if (story == null)
+        {
+            return BadRequest("Invalid request data");
+        }
+
+        // If user profile doesn't exist, handle accordingly
+        var userProfile = _userService.FindByUserName(story.From);
+        if (userProfile == null)
+        {
+            return BadRequest($"User Name {story.From} doesn't exist");
+        }
+
+        var storyResult = _userService.CreateStory(story);
+
+        return StatusCode(200, new { message = storyResult });
+    }
+
+    [HttpGet("user/{username}/stories")]
+    public IActionResult GetStories(string username)
+    {
+        if (string.IsNullOrEmpty(username))
+        {
+            return StatusCode(400, new { message = "Invalid request data" });
+        }
+
+        // If user profile doesn't exist, handle accordingly
+        var userProfile = _userService.FindByUserName(username);
+        if (userProfile == null)
+        {
+            return BadRequest($"User Name {username} doesn't exist");
+        }
+
+        var stories = _userService.GetStories(username);
+        return Ok(stories);
+    }
+
     // POST v1/user/login
     [HttpPost("user/login")]
     public IActionResult Login([FromBody] UserLoginInfo userLoginInfo)

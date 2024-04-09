@@ -11,6 +11,7 @@ using System.Collections;
 using MongoDB.Bson.Serialization;
 using System.Globalization;
 using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver.Core.Connections;
 
 namespace LifeCicklsService.Services
 {
@@ -23,6 +24,7 @@ namespace LifeCicklsService.Services
         private readonly IMongoCollection<UserProfile> _profileCollection;
         private readonly IMongoCollection<LifeCkl> _lifeCklsCollection;
         private readonly IMongoCollection<ConnectionRequest> _connectionRequestsCollection;
+        private readonly IMongoCollection<Story> _storiesCollection;
 
         public UserService(IMongoClient mongoClient)
         {
@@ -31,6 +33,7 @@ namespace LifeCicklsService.Services
             _profileCollection = _database.GetCollection<UserProfile>("profiles");
             _lifeCklsCollection = _database.GetCollection<LifeCkl>("lifeCkls");
             _connectionRequestsCollection = _database.GetCollection<ConnectionRequest>("ConnectionRequests");
+            _storiesCollection = _database.GetCollection<Story>("stories");
         }
 
         public UserProfile Register(UserRegistrationRequest userRegistrationRequest)
@@ -345,6 +348,27 @@ namespace LifeCicklsService.Services
             }
 
             return user;
+        }
+
+        public string CreateStory(Story story)
+        {
+            try
+            {
+                story.StoryId = Guid.NewGuid().ToString();
+                _storiesCollection.InsertOne(story);
+                return "Story created successfully";
+            }
+            catch (Exception e)
+            {
+                return $"Failed to create story, error: {e.Message}";
+            }           
+        }
+
+        public List<Story> GetStories(string userName)
+        {
+            var filter = Builders<Story>.Filter.Eq("From", userName);
+            var connectionProfile = _storiesCollection.Find(filter).ToEnumerable();
+            return connectionProfile.ToList();
         }
     }
 }

@@ -18,5 +18,7 @@ namespace LifeCicklsService.Services
         public List<ConnectionRequest> GetConnectionRequests(string userName);
         public string UpdateConnectionOutcome(ConnectionRequestResult connectionResult);
         public List<Connection> GetConnections(string userName);
+        public string CreateStory(Story story);
+        public List<Story> GetStories(string userName);
     }
 }

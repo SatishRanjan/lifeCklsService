@@ -114,8 +114,18 @@ namespace LifeCicklsService.Services
                     UserName = connectionProfile.UserName,
                     FirstName = connectionProfile.FirstName,
                     LastName = connectionProfile.LastName,
-                    Stories = connectionProfile.Stories
+                    Stories = new List<Story>()
                 };
+
+                var storyFilter = Builders<Story>.Filter.Eq("From", connectionProfile.UserName);
+                var stories = _storiesCollection.Find(storyFilter).ToList();
+                if (stories != null && stories.Any())
+                {
+                    foreach (var story in stories)
+                    {
+                        connection.Stories.Add(story);
+                    }
+                }
 
                 connections.Add(connection);
             }
@@ -362,6 +372,7 @@ namespace LifeCicklsService.Services
             try
             {
                 story.StoryId = Guid.NewGuid().ToString();
+                story.Id = ObjectId.GenerateNewId();
                 _storiesCollection.InsertOne(story);
                 return "Story created successfully";
             }

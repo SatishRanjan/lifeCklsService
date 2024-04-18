@@ -20,5 +20,6 @@ namespace LifeCicklsService.Services
         public List<Connection> GetConnections(string userName);
         public string CreateStory(Story story);
         public List<Story> GetStories(string userName);
+        public string HandleStoryParticipation(StoryParticipantInfo participantInfo);
     }
 }

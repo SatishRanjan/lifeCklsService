@@ -92,14 +92,14 @@ namespace LifeCicklsService.Services
         {
             List<Connection> connections = new();
             UserProfile? userProfile = FindByUserName(userName);
-            if (userProfile == null 
-                || userProfile.Connections == null  
+            if (userProfile == null
+                || userProfile.Connections == null
                 || userProfile.Connections?.Any() == false)
             {
                 return connections;
             }
 
-            foreach(var connectionId in userProfile.Connections)
+            foreach (var connectionId in userProfile.Connections)
             {
                 var filter = Builders<UserProfile>.Filter.Eq("ProfileId", connectionId);
                 var connectionProfile = _profileCollection.Find(filter).FirstOrDefault();
@@ -387,6 +387,33 @@ namespace LifeCicklsService.Services
             var filter = Builders<Story>.Filter.Eq("From", userName);
             var connectionProfile = _storiesCollection.Find(filter).ToEnumerable();
             return connectionProfile.ToList();
+        }
+
+        public string HandleStoryParticipation(StoryParticipantInfo participantInfo)
+        {
+            var storyFilter = Builders<Story>.Filter.Eq("StoryId", participantInfo.StoryId);
+            var story = _storiesCollection.Find(storyFilter).FirstOrDefault();
+
+            if (story == null)
+            {
+                return "Story not found";
+            }
+
+            if (story != null)
+            {
+                story.Participants ??= new List<string>();
+                string participant = participantInfo.FirstName + " " + participantInfo.LastName;
+                if (story.Participants.Contains(participant))
+                {
+                    return string.Empty;
+                }
+
+                story.Participants.Add(participantInfo.FirstName + " " + participantInfo.LastName);
+                var update = Builders<Story>.Update.Set("Participants", story.Participants);
+                _storiesCollection.UpdateOne(storyFilter, update);
+            }
+
+            return string.Empty;
         }
     }
 }

@@ -225,4 +225,33 @@ public class UserController : ControllerBase
             return StatusCode(500, new {message = $"An error occurred: {ex.Message}" });
         }
     }
+
+    // PUT v1/story/handlestoryparticipation
+    [HttpPut("story/handlestoryparticipation")]
+    public IActionResult HandleStoryParticipation([FromBody] StoryParticipantInfo storyParticipantInfo)
+    {
+        if (storyParticipantInfo == null
+            || string.IsNullOrEmpty(storyParticipantInfo.StoryId) 
+            || string.IsNullOrEmpty(storyParticipantInfo.UserName)
+            || string.IsNullOrEmpty(storyParticipantInfo.FirstName)
+            || string.IsNullOrEmpty(storyParticipantInfo.LastName))
+        {
+            return BadRequest(new { message = "Invalid participation request!" });
+        }
+
+        try
+        {
+            string result = _userService.HandleStoryParticipation(storyParticipantInfo);
+            if (!string.IsNullOrEmpty(result))
+            {
+                return BadRequest(new { message = result });
+            }
+
+            return Ok(new { message = "Story participation request recorded successfully"});
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = ex.Message });
+        }
+    }
 }
